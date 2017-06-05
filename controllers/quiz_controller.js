@@ -187,3 +187,93 @@ exports.check = function (req, res, next) {
         answer: answer
     });
 };
+
+// GET /quizzes/random_play
+exports.randomplay = function (req, res, next) {
+   
+    req.session.score = req.session.score || 0;
+
+    if ( !req.session.preguntascorrectas ){   
+        req.session.preguntascorrectas = [];       
+    }
+   
+
+    if (req.session.partidaFin) {
+
+        req.session.partidaFin = false;
+        req.session.score = 0;
+        req.session.preguntascorrectas = [];       
+    }
+
+    models.Quiz.count().then(function(count){
+
+        var aleatorio = Math.floor(Math.random()*count);
+        var id = aleatorio + 1;   
+   
+        while(req.session.preguntascorrectas.indexOf(id) != -1) {
+
+            var aleatorio = Math.floor(Math.random()*count);
+            var id = aleatorio + 1;   
+        }
+
+        req.session.preguntascorrectas.push(id);       
+           
+        models.Quiz.findById(id).then(function(quiz){
+
+            if (quiz) {
+           
+              res.render('quizzes/random_play', {
+                score: req.session.score,
+                quiz: quiz
+              });
+       
+            } else {
+                res.send("Error");
+            }
+        });
+    });
+};
+
+
+// GET /quizzes/randomcheck
+exports.randomcheck = function (req, res, next) {
+
+    models.Quiz.count().then(function(count){
+
+        var answer = req.query.answer || ""; 
+   
+        var result = answer.toLowerCase().trim() === req.quiz.answer.toLowerCase().trim();
+
+        if (result) {
+        	req.session.score++;
+        } else {
+        	req.session.score = 0;
+        }
+
+        if ( req.session.preguntascorrectas.length !== count) {
+
+		if (result) {
+		    	req.session.partidaFin = false;
+		    } else {	
+		    	req.session.partidaFin = true;
+		}
+		      
+	   res.render('quizzes/random_result', {  
+	   result: result,
+	   answer: answer,
+	   score: req.session.score
+
+		});
+	      
+
+	} else { 
+
+	req.session.partidaFin = true;
+
+	res.render('quizzes/random_nomore', {  
+	score: req.session.score       
+
+		 });   
+        }   
+    });
+};
