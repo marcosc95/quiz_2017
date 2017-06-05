@@ -36,6 +36,6 @@ router.get('/help', function (req, res, next) {
 });
 
 //Pagina de Jugar
-router.get('/quizzes/random_play', quizController.randomplay);
+router.get('/quizzes/randomplay', quizController.randomplay);
 
 module.exports = router;

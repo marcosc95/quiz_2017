@@ -222,7 +222,7 @@ exports.randomplay = function (req, res, next) {
 
             if (quiz) {
            
-              res.render('quizzes/random_play', {
+              res.render('quizzes/randomplay', {
                 score: req.session.score,
                 quiz: quiz
               });
